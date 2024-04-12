@@ -3,22 +3,22 @@
 # list of arguments that will be passed to bwrap
 argv=()
 function arg(){
-    argv+=("--$1" "${@:2}")
+	argv+=("--$1" "${@:2}")
 }
 function ro-pass() {
-    for p in "$@"; do
-        arg ro-bind "$p" "$p"
-    done
+	for p in "$@"; do
+		arg ro-bind "$p" "$p"
+	done
 }
 function dev-pass() {
-    for p in "$@"; do
-        arg dev-bind "$p" "$p"
-    done
+	for p in "$@"; do
+		arg dev-bind "$p" "$p"
+	done
 }
 function pass() {
-    for p in "$@"; do
-        arg bind "$p" "$p"
-    done
+	for p in "$@"; do
+		arg bind "$p" "$p"
+	done
 }
 
 # enables networking capability
@@ -43,24 +43,24 @@ function enable_audio() {
 # usage: enable_display
 function enable_display() {
 	if [ ! -z "$DISPLAY" ]; then
-        # arg bind "/tmp/.X11-unix/X${DISPLAY#:*}" "/tmp/.X11-unix/X${DISPLAY#:*}"
-        DISPLAY_ID="$(grep -Pom1 '[0-9]+' <<< "$DISPLAY" | head -n 1)"
-        pass "/tmp/.X11-unix/X${DISPLAY_ID#:*}"
+		# arg bind "/tmp/.X11-unix/X${DISPLAY#:*}" "/tmp/.X11-unix/X${DISPLAY#:*}"
+		DISPLAY_ID="$(grep -Pom1 '[0-9]+' <<< "$DISPLAY" | head -n 1)"
+		pass "/tmp/.X11-unix/X${DISPLAY_ID#:*}"
 
-        arg setenv 'DISPLAY' :"$DISPLAY_ID"
+		arg setenv 'DISPLAY' :"$DISPLAY_ID"
 
-        ro-pass "$XAUTHORITY"
-        arg setenv 'XAUTHORITY' "$XAUTHORITY"
-    fi
+		ro-pass "$XAUTHORITY"
+		arg setenv 'XAUTHORITY' "$XAUTHORITY"
+	fi
 
-    # for wayland
-    if [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
-        ro-pass "$XDG_RUNTIME_DIR/wayland-0"
+	# for wayland
+	if [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
+		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
 
-        XAUTH_PATH="$(ls "$XDG_RUNTIME_DIR"/xauth_* | head -n 1)"
-        ro-pass "$XAUTH_PATH"
-        arg setenv 'XAUTHORITY' "$XAUTH_PATH"
-    fi
+		XAUTH_PATH="$(ls "$XDG_RUNTIME_DIR"/xauth_* | head -n 1)"
+		ro-pass "$XAUTH_PATH"
+		arg setenv 'XAUTHORITY' "$XAUTH_PATH"
+	fi
 }
 
 # enables dbus suppoprt
@@ -78,7 +78,7 @@ function pass_dri() {
 	ro-pass '/sys/devices'
 	dev-pass '/dev/dri'
 	for i in '/dev/nvidia'*; do
-	    dev-pass "$i"
+		dev-pass "$i"
 	done
 }
 
@@ -145,11 +145,11 @@ function common_env(){
 
 	# pass appropriate terminal
 	if [ ! -z "$TERM" ]; then 
-        arg setenv 'TERM' "$TERM"
-    fi
+		arg setenv 'TERM' "$TERM"
+	fi
 
-    # ensure everything dies with parent
-    arg die-with-parent
+	# ensure everything dies with parent
+	arg die-with-parent
 }
 
 # pass input devices
