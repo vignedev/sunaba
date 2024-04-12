@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+source "$(dirname "$0")/../sunaba.sh"
+
+common_env "$HOME/.sandbox"
+enable_display
+enable_audio
+enable_net
+
+execute '/bin/bash'

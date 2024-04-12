@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+source "$(dirname "$0")/../sunaba.sh"
+
+common_env "$HOME/.sandbox"
+enable_display
+enable_audio
+enable_net
+
+pass_dri # for hw acceleration
+arg setenv 'MOZ_USE_XINPUT2' '1'
+
+execute '/usr/bin/firefox-developer-edition'
