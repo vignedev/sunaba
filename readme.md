@@ -4,7 +4,7 @@
 
 I needed a relatively simple way to create sandboxed environments, which could not access my `$HOME` folders, external storage devices, or access the internet.
 
-`bwrap` by itself allows you to do so already, however the command line to create such environments can be quite large, with most of the arguments being shared with other sanboxex. This script essentially provides helper bash functions to hasten the creation of such environments.
+`bwrap` by itself allows you to do so already, however, the command line to create such environments can be quite large, with most of the arguments being shared with other sandboxes. This script essentially provides helper bash functions to hasten the creation of such environments.
 
 ## SCRIPTING USAGE
 
@@ -74,7 +74,7 @@ the flags can be the following:
 
 ## DISCLAIMER
 
-This script (mainly `common_env`) makes quite a lot of assumptions to how the Linux system is setup. Be aware that a intensive security audit was not performed, thus it may be possible to escape the sandbox (especially with `enable_dbus`).
+This script (mainly `common_env`) makes quite a lot of assumptions about how the Linux system is set up. Be aware that an intensive security audit was not performed, thus it may be possible to escape the sandbox (especially with `enable_dbus`).
 
 ## LICENSE
 
