@@ -114,7 +114,7 @@ function common_env(){
 	ro-pass \
 		'/etc/passwd' \
 		'/etc/profile' '/etc/profile.d' \
-		'/etc/bash.bashrc' '/etc/bash_completion.d' \
+		'/etc/bash.bashrc' \
 		'/etc/fonts' '/etc/environment' '/etc/localtime'
 
 	# set uid/gid to 1000

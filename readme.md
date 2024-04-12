@@ -15,7 +15,7 @@ Create a bash script, which sources the [`sunaba.sh`](./sunaba.sh) file. After t
 common_env "$HOMEDIR"  # common settings for (my) environment
                        # - the "$HOMEDIR" becomes "/home/$USER" in the sandbox
                        # - passes '/bin' and '/usr'
-                       # - passes '/etc/{passwd,profile/profile.d/bash.bashrc/bash_completion.d}
+                       # - passes '/etc/{passwd,profile/profile.d/bash.bashrc}
                        # - passes '/etc/{fonts,environment,localtime}'
                        # - passes CA certificates (from /usr/share/ca-certificates, /etc/{ssl,ca-certificates})
                        # - passses /sys/dev/char, /sys/devices
