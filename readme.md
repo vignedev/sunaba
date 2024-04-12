@@ -6,7 +6,7 @@ I needed a relatively simple way to create sandboxed environments, which could n
 
 `bwrap` by itself allows you to do so already, however the command line to create such environments can be quite large, with most of the arguments being shared with other sanboxex. This script essentially provides helper bash functions to hasten the creation of such environments.
 
-## USAGE
+## SCRIPTING USAGE
 
 Create a bash script, which sources the [`sunaba.sh`](./sunaba.sh) file. After that, you can call these functions to enable certain functionalities in the sandbox:
 
@@ -51,6 +51,26 @@ pass "X" "Y" "Z"       # save as --ro-pass, however uses --bind instead (rw file
 ## EXAMPLES
 
 Examples of the scripts that I use can be found within the [`examples`](./examples/) folder.
+
+## EXECUTION USAGE
+
+It is possible to use the `sunaba.sh` as a script directly, with the following syntax:
+```console
+$ ./sunaba.sh
+usage: ./sunaba.sh [flags] -- <bwrap args> -- <command> [arguments]
+       ./sunaba.sh [flags] -- <command> [arguments]
+
+this script implicitly calls 'common_env' with '$SANDBOX_DIR' which will be set to '$HOME/.sandbox' by default
+the flags can be the following:
+    -d    enables X11/Wayland support
+    -a    enabled PipeWire/pulseaudio support
+    -n    enables networking capabilities
+    -s    passes dbus system socket
+    -r    passes all dri devices
+    -i    passes all input devices
+    -v    verbose (just dumps the argv before execution)
+```
+
 
 ## DISCLAIMER
 

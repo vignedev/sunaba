@@ -163,3 +163,84 @@ function pass_input_devices(){
 function execute() {
 	bwrap "${argv[@]}" -- "$@"
 }
+
+# 
+#  sunaba.sh is used as a script
+# 
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+	function print_help(){
+		echo "usage: $0 [flags] -- <bwrap args> -- <command> [arguments]"
+		echo "       $0 [flags] -- <command> [arguments]"
+		echo ""
+		echo "this script implicitly calls 'common_env' with '\$SANDBOX_DIR' which will be set to '\$HOME/.sandbox' by default"
+		echo "the flags can be the following:"
+		echo "    -d    enables X11/Wayland support"
+		echo "    -a    enabled PipeWire/pulseaudio support"
+		echo "    -n    enables networking capabilities"
+		echo "    -s    passes dbus system socket"
+		echo "    -r    passes all dri devices"
+		echo "    -i    passes all input devices"
+		echo "    -v    verbose (just dumps the argv before execution)"
+		exit 1
+	}
+
+	if [ -z "$SANDBOX_DIR" ]; then
+		SANDBOX_DIR="$HOME/.sandbox"
+	fi
+
+	common_env "$SANDBOX_DIR"
+
+	VERBOSE=0
+	while getopts 'hdansriv' option; do
+		case "$option" in
+			d) enable_display ;;
+			a) enable_audio ;;
+			n) enable_net ;;
+			s) enable_dbus ;;
+			r) pass_dri ;;
+			i) pass_input_devices ;;
+			h) print_help ;;
+			v) VERBOSE=1 ;;
+			*) echo "option=$option" ;;
+		esac
+	done
+
+	shift "$((OPTIND-1))"
+	if [ -z "$1" ]; then
+		print_help
+	fi
+	
+	if [ $VERBOSE -eq 1 ]; then
+		echo ">> AFTER_OPTS: '$*"
+	fi
+
+	doubledash=0
+	group_n=0
+	group_argv=()
+
+	for option in "$@"; do
+		((group_n++))
+		shift 1
+		if [ "$option" = "--" ]; then
+			doubledash=1
+			break
+		fi
+		group_argv+=("$option")
+	done
+
+	# in case additional bwrap options are used
+	if [ "$doubledash" -eq 1 ]; then # sunaba.sh -- bwrap -- command
+		argv+=("${group_argv[@]}")
+	fi
+
+	# execution phase
+	user_command=()
+	if [ "$doubledash" -eq 1 ]; then
+		user_command=("$@")
+	else
+		user_command=("${group_argv[@]}")
+	fi
+
+	if [ $VERBOSE -eq 1 ]; then echo ">> ARGV: '${argv[*]} -- ${user_command[*]}'"; fi
+	execute "${user_command[@]}"
+fi
