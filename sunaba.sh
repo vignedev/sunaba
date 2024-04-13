@@ -2,24 +2,19 @@
 
 # list of arguments that will be passed to bwrap
 argv=()
-function arg(){
-	argv+=("--$1" "${@:2}")
-}
-function ro-pass() {
-	for p in "$@"; do
-		arg ro-bind "$p" "$p"
+function arg(){ argv+=("--$1" "${@:2}"); }
+function _pass() {
+	for p in "${@:2}"; do
+		arg "$1" "$p" "$p"
 	done
 }
-function dev-pass() {
-	for p in "$@"; do
-		arg dev-bind "$p" "$p"
-	done
-}
-function pass() {
-	for p in "$@"; do
-		arg bind "$p" "$p"
-	done
-}
+function pass() { _pass bind "$@"; }
+function ro-pass() { _pass ro-bind "$@"; }
+function dev-pass() { _pass dev-bind "$@"; }
+
+function try-pass() { _pass bind-try "$@"; }
+function try-ro-pass() { _pass ro-bind-try "$@"; }
+function try-dev-pass() { _pass dev-bind-try "$@"; }
 
 # enables networking capability
 # usage: enable_net
@@ -113,9 +108,11 @@ function common_env(){
 	# passing through /etc files
 	ro-pass \
 		'/etc/passwd' \
-		'/etc/profile' '/etc/profile.d' \
-		'/etc/bash.bashrc' \
 		'/etc/fonts' '/etc/environment' '/etc/localtime'
+
+	# these file may or may not exist, so only try but don't fail
+	try-ro-pass \
+		'/etc/profile' '/etc/profile.d' '/etc/bash.bashrc'
 
 	# set uid/gid to 1000
 	arg uid 1000
