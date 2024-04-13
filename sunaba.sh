@@ -178,17 +178,21 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -r    passes all dri devices"
 		echo "    -i    passes all input devices"
 		echo "    -v    verbose (just dumps the argv before execution)"
+		echo "    -h    displays this help and exits"
 		exit 1
 	}
 
+	# if $SANDBOX_DIR is not specified, use the default in $HOME/.sandbox
 	if [ -z "$SANDBOX_DIR" ]; then
 		SANDBOX_DIR="$HOME/.sandbox"
 	fi
-
 	common_env "$SANDBOX_DIR"
 
+	# VERBOSE just dumps the final arguments passed to bwrap
 	VERBOSE=0
-	while getopts 'hdansriv' option; do
+
+	# parse the flags (default)
+	while getopts 'dansrihv' option; do
 		case "$option" in
 			d) enable_display ;;
 			a) enable_audio ;;
@@ -202,42 +206,42 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		esac
 	done
 
+	# get the items past the flags
 	shift "$((OPTIND-1))"
-	if [ -z "$1" ]; then
-		print_help
-	fi
-	
-	if [ $VERBOSE -eq 1 ]; then
-		echo ">> AFTER_OPTS: '$*"
-	fi
+	if [ "$VERBOSE" -eq 1 ]; then echo ">> AFTER_OPTS: '$*'"; fi
 
-	doubledash=0
-	group_n=0
+	# has_bwrap_args == a double dash is found after the first '--'
+	has_bwrap_args=0
+	# arguments/items specified *before* the double-dash (could be bwrap args/command)
 	group_argv=()
-
 	for option in "$@"; do
-		((group_n++))
 		shift 1
 		if [ "$option" = "--" ]; then
-			doubledash=1
+			has_bwrap_args=1
 			break
 		fi
 		group_argv+=("$option")
 	done
 
 	# in case additional bwrap options are used
-	if [ "$doubledash" -eq 1 ]; then # sunaba.sh -- bwrap -- command
+	# eg.: sunaba.sh -- bwrap -- command
+	if [ "$has_bwrap_args" -eq 1 ]; then
 		argv+=("${group_argv[@]}")
 	fi
 
 	# execution phase
 	user_command=()
-	if [ "$doubledash" -eq 1 ]; then
+	if [ "$has_bwrap_args" -eq 1 ]; then
 		user_command=("$@")
 	else
 		user_command=("${group_argv[@]}")
 	fi
+	if [ "$VERBOSE" -eq 1 ]; then echo ">> user_command: '${user_command[*]}'"; fi
 
-	if [ $VERBOSE -eq 1 ]; then echo ">> ARGV: '${argv[*]} -- ${user_command[*]}'"; fi
+	# display help if there is no command to be run
+	if [ -z "${user_command[0]}" ]; then print_help; fi
+
+	# execute the command
+	if [ "$VERBOSE" -eq 1 ]; then echo ">> ARGV: '${argv[*]} -- ${user_command[*]}'"; fi
 	execute "${user_command[@]}"
 fi
