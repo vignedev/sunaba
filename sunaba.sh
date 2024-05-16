@@ -73,7 +73,7 @@ function pass_dri() {
 	ro-pass '/sys/devices'
 	dev-pass '/dev/dri'
 	for i in '/dev/nvidia'*; do
-		dev-pass "$i"
+		try-dev-pass "$i"
 	done
 }
 
