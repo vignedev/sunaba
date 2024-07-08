@@ -32,8 +32,9 @@ enable_dbus            # enables DBUS system socket
                        # - enable only if necessary
 
 # Passes certain device files to the sandbox
-pass_dri               # passes /dev/dri, /dev/nvidia* and /sys/devices
+pass_dri               # passes /dev/dri and /sys/devices
 pass_input_devices     # passes the entirety of /dev/input
+pass_nvidia            # passes /dev/nvidia* and /sys/module/nvidia
 
 # The final call
 execute "$CMD" "$ARGS" # runs the program at "$CMD" with "$ARGS"
@@ -69,6 +70,7 @@ the flags can be the following:
     -r    passes all dri devices
     -i    passes all input devices
     -v    verbose (just dumps the argv before execution)
+    -N    passes nvidia devices
 ```
 
 

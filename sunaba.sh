@@ -72,9 +72,15 @@ function enable_dbus() {
 function pass_dri() {
 	ro-pass '/sys/devices'
 	dev-pass '/dev/dri'
+}
+
+# passes NVIDIA related items
+# usage: pass_nvidia
+function pass_nvidia() {
 	for i in '/dev/nvidia'*; do
-		try-dev-pass "$i"
+		dev-pass "$i"
 	done
+	ro-pass '/sys/module/nvidia'
 }
 
 # common passthrough
@@ -179,6 +185,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -i    passes all input devices"
 		echo "    -v    verbose (just dumps the argv before execution)"
 		echo "    -h    displays this help and exits"
+		echo "    -N    passes nvidia devices"
 		exit 1
 	}
 
@@ -192,7 +199,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	VERBOSE=0
 
 	# parse the flags (default)
-	while getopts 'dansrihv' option; do
+	while getopts 'dansrihvN' option; do
 		case "$option" in
 			d) enable_display ;;
 			a) enable_audio ;;
@@ -202,6 +209,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 			i) pass_input_devices ;;
 			h) print_help ;;
 			v) VERBOSE=1 ;;
+			N) pass_nvidia ;;
 			*) echo "option=$option" ;;
 		esac
 	done
