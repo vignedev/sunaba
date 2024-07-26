@@ -186,6 +186,10 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -v    verbose (just dumps the argv before execution)"
 		echo "    -h    displays this help and exits"
 		echo "    -N    passes nvidia devices"
+		echo ""
+		echo "for convenience, these options were added to bwrap args:"
+		echo "   --pass <path>     equivalent to '--bind <path> <path>'"
+		echo "   --ro-pass <path>  the same as above, however with '--ro-bind'"
 		exit 1
 	}
 
@@ -233,8 +237,33 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 	# in case additional bwrap options are used
 	# eg.: sunaba.sh -- bwrap -- command
+	pass_next=0
 	if [ "$has_bwrap_args" -eq 1 ]; then
-		argv+=("${group_argv[@]}")
+		for bwrap_arg in "${group_argv[@]}"; do
+			if [ "$pass_next" -eq 1 ]; then
+				if [ ! -e "$bwrap_arg" ]; then
+					echo "failed --[ro]-pass: could not resolve '$bwrap_arg'"
+					exit 1
+				fi
+				argv+=("$bwrap_arg" "$bwrap_arg")
+				pass_next=0
+				continue
+			elif [ "$bwrap_arg" = "--pass" ]; then
+				argv+=("--bind")
+				pass_next=1
+				continue
+			elif [ "$bwrap_arg" = "--ro-pass" ]; then
+				argv+=("--ro-bind")
+				pass_next=1
+				continue
+			fi
+
+			argv+=("$bwrap_arg")
+		done
+	fi
+	if [ "$pass_next" -eq 1 ]; then
+		echo "failed --[ro]-pass: trailing option"
+		exit 1
 	fi
 
 	# execution phase
