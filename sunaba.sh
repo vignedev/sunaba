@@ -118,7 +118,8 @@ function common_env(){
 
 	# these file may or may not exist, so only try but don't fail
 	try-ro-pass \
-		'/etc/profile' '/etc/profile.d' '/etc/bash.bashrc'
+		'/etc/profile' '/etc/profile.d' '/etc/bash.bashrc' \
+		'/etc/ld.so.cache' '/etc/ld.so.conf' '/etc/ld.so.conf.d'
 
 	# set uid/gid to 1000
 	arg uid 1000
