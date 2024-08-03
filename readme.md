@@ -35,6 +35,7 @@ enable_dbus            # enables DBUS system socket
 pass_dri               # passes /dev/dri and /sys/devices
 pass_input_devices     # passes the entirety of /dev/input
 pass_nvidia            # passes /dev/nvidia* and /sys/module/nvidia
+pass_drm               # passes /sys/class/drm
 
 # The final call
 execute "$CMD" "$ARGS" # runs the program at "$CMD" with "$ARGS"
@@ -71,6 +72,7 @@ the flags can be the following:
     -i    passes all input devices
     -v    verbose (just dumps the argv before execution)
     -N    passes nvidia devices
+    -D    passes DRM devices
 ```
 
 

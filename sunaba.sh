@@ -74,6 +74,12 @@ function pass_dri() {
 	dev-pass '/dev/dri'
 }
 
+# passes DRM devices
+# usage: pass_drm
+function pass_drm() {
+	ro-pass '/sys/class/drm'
+}
+
 # passes NVIDIA related items
 # usage: pass_nvidia
 function pass_nvidia() {
@@ -187,6 +193,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -v    verbose (just dumps the argv before execution)"
 		echo "    -h    displays this help and exits"
 		echo "    -N    passes nvidia devices"
+		echo "    -D    passes DRM devices"
 		echo ""
 		echo "for convenience, these options were added to bwrap args:"
 		echo "   --pass <path>     equivalent to '--bind <path> <path>'"
@@ -204,7 +211,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	VERBOSE=0
 
 	# parse the flags (default)
-	while getopts 'dansrihvN' option; do
+	while getopts 'dansrihvND' option; do
 		case "$option" in
 			d) enable_display ;;
 			a) enable_audio ;;
@@ -215,6 +222,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 			h) print_help ;;
 			v) VERBOSE=1 ;;
 			N) pass_nvidia ;;
+			D) pass_drm ;;
 			*) echo "option=$option" ;;
 		esac
 	done
