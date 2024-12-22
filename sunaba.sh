@@ -150,9 +150,6 @@ function common_env(){
 	# unshare everything
 	arg unshare-all
 
-	# default chdir to home dir
-	arg chdir "/home/$USER"
-
 	# pass appropriate terminal
 	if [ ! -z "$TERM" ]; then 
 		arg setenv 'TERM' "$TERM"
@@ -246,6 +243,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 	# in case additional bwrap options are used
 	# eg.: sunaba.sh -- bwrap -- command
+	changed_cwd=0
 	pass_next=0
 	if [ "$has_bwrap_args" -eq 1 ]; then
 		for bwrap_arg in "${group_argv[@]}"; do
@@ -254,24 +252,38 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 					echo "failed --[ro]-pass: could not resolve '$bwrap_arg'"
 					exit 1
 				fi
-				argv+=("$bwrap_arg" "$bwrap_arg")
+
+				for n in $(seq "$pass_next"); do
+					argv+=("$bwrap_arg")
+				done
 				pass_next=0
 				continue
 			elif [ "$bwrap_arg" = "--pass" ]; then
 				argv+=("--bind")
-				pass_next=1
+				pass_next=2
 				continue
 			elif [ "$bwrap_arg" = "--ro-pass" ]; then
 				argv+=("--ro-bind")
+				pass_next=2
+				continue
+			elif [ "$bwrap_arg" = "--chdir" ]; then
+				argv+=("--chdir")
 				pass_next=1
+				changed_cwd=1
 				continue
 			fi
 
 			argv+=("$bwrap_arg")
 		done
 	fi
-	if [ "$pass_next" -eq 1 ]; then
-		echo "failed --[ro]-pass: trailing option"
+
+	if [ "$changed_cwd" -eq 0 ]; then
+		# default chdir to home dir
+		arg chdir "/home/$USER"
+	fi
+
+	if [ "$pass_next" -ne 0 ]; then
+		echo "failed: trailing option (either --[ro]-pass or --chdir)"
 		exit 1
 	fi
 
