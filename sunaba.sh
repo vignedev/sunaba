@@ -247,9 +247,9 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	pass_next=0
 	if [ "$has_bwrap_args" -eq 1 ]; then
 		for bwrap_arg in "${group_argv[@]}"; do
-			if [ "$pass_next" -eq 1 ]; then
+			if [ "$pass_next" -ne 0 ]; then
 				if [ ! -e "$bwrap_arg" ]; then
-					echo "failed --[ro]-pass: could not resolve '$bwrap_arg'"
+					echo "failed: could not resolve '$bwrap_arg'"
 					exit 1
 				fi
 
