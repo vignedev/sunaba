@@ -111,9 +111,10 @@ function common_env(){
 	arg dev '/dev'
 	arg proc '/proc'
 	arg tmpfs '/tmp'
-	ro-pass '/bin'
 	arg symlink '/usr/lib' '/lib'
 	arg symlink '/usr/lib' '/lib64'
+	arg symlink '/usr/bin' '/bin'
+	arg symlink '/usr/bin' '/sbin'
 	arg symlink '/run' '/var/run'
 	ro-pass '/usr'
 
