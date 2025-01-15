@@ -52,9 +52,8 @@ function enable_display() {
 	if [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
 		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
 
-		XAUTH_PATH="$(ls "$XDG_RUNTIME_DIR"/xauth_* | head -n 1)"
-		ro-pass "$XAUTH_PATH"
-		arg setenv 'XAUTHORITY' "$XAUTH_PATH"
+		ro-pass "$XAUTHORITY"
+		arg setenv 'XAUTHORITY' "$XAUTHORITY"
 	fi
 }
 
