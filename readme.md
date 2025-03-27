@@ -34,7 +34,7 @@ enable_dbus            # enables DBUS system socket
 # Passes certain device files to the sandbox
 pass_dri               # passes /dev/dri and /sys/devices
 pass_input_devices     # passes the entirety of /dev/input
-pass_nvidia            # passes /dev/nvidia* and /sys/module/nvidia
+pass_nvidia            # passes /dev/nvidia* and /sys/module/nvidia*
 pass_drm               # passes /sys/class/drm
 
 # The final call
