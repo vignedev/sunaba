@@ -49,11 +49,12 @@ function enable_display() {
 	fi
 
 	# for wayland
-	if [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
+	if [ ! -z "$WAYLAND_DISPLAY" ] && [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
 		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
 
 		ro-pass "$XAUTHORITY"
 		arg setenv 'XAUTHORITY' "$XAUTHORITY"
+		arg setenv 'WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
 	fi
 }
 
