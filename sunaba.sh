@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# SC2236 (style): Use -n instead of ! -z. (https://www.shellcheck.net/wiki/SC2236)
+# shellcheck disable=SC2236
+
 # list of arguments that will be passed to bwrap
 argv=()
 function arg(){ argv+=("--$1" "${@:2}"); }
@@ -147,6 +150,10 @@ function common_env(){
 	arg setenv 'XDG_RUNTIME_DIR' "$XDG_RUNTIME_DIR"
 	arg setenv 'PATH' '/usr/local/sbin:/usr/local/bin:/usr/bin'
 
+	arg setenv LANG 'en_US.UTF-8'
+	arg setenv LANGUAGE 'en_US.UTS-8'
+	arg setenv LC_ALL 'C'
+
 	# unshare everything
 	arg unshare-all
 
@@ -253,7 +260,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 					exit 1
 				fi
 
-				for n in $(seq "$pass_next"); do
+				for _ in $(seq "$pass_next"); do
 					argv+=("$bwrap_arg")
 				done
 				pass_next=0
