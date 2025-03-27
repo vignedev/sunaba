@@ -83,10 +83,9 @@ function pass_drm() {
 # passes NVIDIA related items
 # usage: pass_nvidia
 function pass_nvidia() {
-	for i in '/dev/nvidia'*; do
-		dev-pass "$i"
+	for i in '/dev/nvidia'* '/sys/module/nvidia'*; do
+		try-dev-pass "$i"
 	done
-	ro-pass '/sys/module/nvidia'
 }
 
 # common passthrough
