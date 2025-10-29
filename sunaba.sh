@@ -54,9 +54,8 @@ function enable_display() {
 	# for wayland
 	if [ ! -z "$WAYLAND_DISPLAY" ] && [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
 		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
+		ro-pass "$XDG_RUNTIME_DIR/wayland-0.lock"
 
-		ro-pass "$XAUTHORITY"
-		arg setenv 'XAUTHORITY' "$XAUTHORITY"
 		arg setenv 'WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
 	fi
 }
