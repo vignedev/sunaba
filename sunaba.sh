@@ -37,9 +37,20 @@ function enable_audio() {
     fi
 }
 
-# enables display support (should be both X11 and Wayland)
-# usage: enable_display
-function enable_display() {
+# usage: enable_wayland
+function enable_wayland () {
+	if [ ! -z "$WAYLAND_DISPLAY" ] && [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
+		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
+		ro-pass "$XDG_RUNTIME_DIR/wayland-0.lock"
+
+		arg setenv 'WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
+	else
+		echo "warning: WAYLAND_DISPLAY is not set, or its socket is not found, wayland is not passed"
+	fi
+}
+
+# usage: enable_x11
+function enable_x11 () {
 	if [ ! -z "$DISPLAY" ]; then
 		# arg bind "/tmp/.X11-unix/X${DISPLAY#:*}" "/tmp/.X11-unix/X${DISPLAY#:*}"
 		DISPLAY_ID="$(grep -Pom1 '[0-9]+' <<< "$DISPLAY" | head -n 1)"
@@ -49,15 +60,16 @@ function enable_display() {
 
 		ro-pass "$XAUTHORITY"
 		arg setenv 'XAUTHORITY' "$XAUTHORITY"
+	else
+		echo "warning: DISPLAY is not set, X11 is not passed"
 	fi
+}
 
-	# for wayland
-	if [ ! -z "$WAYLAND_DISPLAY" ] && [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
-		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
-		ro-pass "$XDG_RUNTIME_DIR/wayland-0.lock"
-
-		arg setenv 'WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
-	fi
+# enables display support (should be both X11 and Wayland)
+# usage: enable_display
+function enable_display() {
+	enable_wayland
+	enable_x11
 }
 
 # enables dbus suppoprt
@@ -187,7 +199,9 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo ""
 		echo "this script implicitly calls 'common_env' with '\$SANDBOX_DIR' which will be set to '\$HOME/.sandbox' by default"
 		echo "the flags can be the following:"
-		echo "    -d    enables X11/Wayland support"
+		echo "    -d    enables X11/Wayland support (equivalent to -wx)"
+		echo "    -w    enables Wayland support only"
+		echo "    -x    enables X11 support only"
 		echo "    -a    enabled PipeWire/pulseaudio support"
 		echo "    -n    enables networking capabilities"
 		echo "    -s    passes dbus system socket"
@@ -214,9 +228,11 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	VERBOSE=0
 
 	# parse the flags (default)
-	while getopts 'dansrihvND' option; do
+	while getopts 'dwxansrihvND' option; do
 		case "$option" in
 			d) enable_display ;;
+			w) enable_wayland ;;
+			x) enable_x11 ;;
 			a) enable_audio ;;
 			n) enable_net ;;
 			s) enable_dbus ;;
