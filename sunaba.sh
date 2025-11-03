@@ -273,10 +273,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 				pass_next=2
 				continue
 			elif [ "$bwrap_arg" = "--chdir" ]; then
-				argv+=("--chdir")
-				pass_next=1
 				changed_cwd=1
-				continue
 			fi
 
 			argv+=("$bwrap_arg")
