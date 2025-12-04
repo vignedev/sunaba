@@ -75,10 +75,8 @@ function enable_display() {
 # enables dbus suppoprt
 # usage: enable_dbus
 function enable_dbus() {
-	ro-pass '/run/dbus'
-	ro-pass '/etc/machine-id'
-	ro-pass "$XDG_RUNTIME_DIR/bus"
-	arg setenv 'DBUS_SESSION_BUS_ADDRESS' "unix:path=$XDG_RUNTIME_DIR/bus"
+	ro-pass "$(sed 's/^unix:path=//g' <<< "$DBUS_SESSION_BUS_ADDRESS" | sed 's/,guid=[0-9a-f]*$//g')" # "$XDG_RUNTIME_DIR/bus"
+	arg setenv 'DBUS_SESSION_BUS_ADDRESS' "$DBUS_SESSION_BUS_ADDRESS"
 }
 
 # passes DRI devices
@@ -204,7 +202,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -x    enables X11 support only"
 		echo "    -a    enabled PipeWire/pulseaudio support"
 		echo "    -n    enables networking capabilities"
-		echo "    -s    passes dbus system socket"
+		echo "    -s    passes dbus session socket"
 		echo "    -r    passes all dri devices"
 		echo "    -i    passes all input devices"
 		echo "    -v    verbose (just dumps the argv before execution)"
