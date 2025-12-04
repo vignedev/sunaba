@@ -153,6 +153,7 @@ function common_env(){
 	ro-pass '/etc/ca-certificates'
 
 	# default home env + path (not exported due to profile.d not being loaded by default)
+	arg setenv 'USER' "$USER"
 	arg setenv 'HOME' "/home/$USER"
 	arg setenv 'XDG_CACHE_HOME' "/home/$USER/.cache"
 	arg setenv 'XDG_CONFIG_HOME' "/home/$USER/.config"
