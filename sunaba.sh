@@ -130,18 +130,18 @@ function common_env(){
 	ro-pass '/usr'
 
 	# passing through /etc files
-	ro-pass \
-		'/etc/passwd' \
-		'/etc/fonts' '/etc/environment' '/etc/localtime'
+	ro-pass '/etc/fonts' '/etc/localtime'
+	arg file 200 /etc/passwd
+	arg file 201 /etc/group
 
 	# these file may or may not exist, so only try but don't fail
 	try-ro-pass \
 		'/etc/profile' '/etc/profile.d' '/etc/bash.bashrc' \
 		'/etc/ld.so.cache' '/etc/ld.so.conf' '/etc/ld.so.conf.d'
 
-	# set uid/gid to 1000
-	arg uid 1000
-	arg gid 1000
+	# set uid/gid to the current user's id
+	arg uid "$(id -u)"
+	arg gid "$(id -g)"
 
 	# basic devices
 	ro-pass '/sys/dev/char'
@@ -319,5 +319,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 	# execute the command
 	if [ "$VERBOSE" -eq 1 ]; then echo ">> ARGV: '${argv[*]} -- ${user_command[*]}'"; fi
-	execute "${user_command[@]}"
+	execute "${user_command[@]}" \
+	  200< <(getent passwd "$(id -u)" 65534) \
+		201< <(getent passwd "$(id -u)" 65534)
 fi
