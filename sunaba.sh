@@ -39,9 +39,9 @@ function enable_audio() {
 
 # usage: enable_wayland
 function enable_wayland () {
-	if [ ! -z "$WAYLAND_DISPLAY" ] && [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then 
-		ro-pass "$XDG_RUNTIME_DIR/wayland-0"
-		ro-pass "$XDG_RUNTIME_DIR/wayland-0.lock"
+	if [ ! -z "$WAYLAND_DISPLAY" ] && [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
+  	ro-pass "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
+  	ro-pass "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY.lock"
 
 		arg setenv 'WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
 	else
