@@ -283,8 +283,16 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 				argv+=("--bind")
 				pass_next=2
 				continue
+			elif [ "$bwrap_arg" = "--pass-try" ]; then
+				argv+=("--bind-try")
+				pass_next=2
+				continue
 			elif [ "$bwrap_arg" = "--ro-pass" ]; then
 				argv+=("--ro-bind")
+				pass_next=2
+				continue
+			elif [ "$bwrap_arg" = "--ro-pass-try" ]; then
+				argv+=("--ro-bind-try")
 				pass_next=2
 				continue
 			elif [ "$bwrap_arg" = "--chdir" ]; then
