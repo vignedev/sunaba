@@ -214,8 +214,10 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -D    passes DRM devices"
 		echo ""
 		echo "for convenience, these options were added to bwrap args:"
-		echo "   --pass <path>     equivalent to '--bind <path> <path>'"
-		echo "   --ro-pass <path>  the same as above, however with '--ro-bind'"
+		echo "   --pass <path>        equivalent to '--bind <path> <path>'"
+		echo "   --ro-pass <path>     the same as above, however with '--ro-bind'"
+		echo "   --pass-try <path>    same as pass, but instead of --bind, it's --bind-try"
+		echo "   --ro-pass-try <path> same as above, however with '--ro-bind-try'"
 		exit 1
 	}
 
