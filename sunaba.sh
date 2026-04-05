@@ -185,7 +185,9 @@ function pass_input_devices(){
 # executes the bwrap with given arguments
 # usage: execute <command> [...arguments]
 function execute() {
-	bwrap "${argv[@]}" -- "$@"
+	bwrap "${argv[@]}" -- "$@" \
+	  200< <(getent passwd "$(id -u)" 65534) \
+		201< <(getent group "$(id -u)" 65534)
 }
 
 #
@@ -327,7 +329,5 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 	# execute the command
 	if [ "$VERBOSE" -eq 1 ]; then echo ">> ARGV: '${argv[*]} -- ${user_command[*]}'"; fi
-	execute "${user_command[@]}" \
-	  200< <(getent passwd "$(id -u)" 65534) \
-		201< <(getent passwd "$(id -u)" 65534)
+	execute "${user_command[@]}"
 fi
