@@ -168,7 +168,7 @@ function common_env(){
 	arg unshare-all
 
 	# pass appropriate terminal
-	if [ ! -z "$TERM" ]; then 
+	if [ ! -z "$TERM" ]; then
 		arg setenv 'TERM' "$TERM"
 	fi
 
@@ -188,9 +188,9 @@ function execute() {
 	bwrap "${argv[@]}" -- "$@"
 }
 
-# 
+#
 #  sunaba.sh is used as a script
-# 
+#
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	function print_help(){
 		echo "usage: $0 [flags] -- <bwrap args> -- <command> [arguments]"
