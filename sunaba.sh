@@ -183,6 +183,15 @@ function pass_input_devices(){
 	dev-pass "/dev/input"
 }
 
+# pass all hidraw devices
+# usage: pass_hidraw_devices
+function pass_hidraw_devices(){
+  ro-pass "/sys/class/hidraw"
+  for i in "/dev/hidraw"*; do
+    dev-pass "$i"
+  done
+}
+
 # executes the bwrap with given arguments
 # usage: execute <command> [...arguments]
 function execute() {
@@ -213,6 +222,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		echo "    -s    passes dbus session socket"
 		echo "    -r    passes all dri devices"
 		echo "    -i    passes all input devices"
+		echo "    -R    passes all hidraw devices"
 		echo "    -v    verbose (just dumps the argv before execution)"
 		echo "    -h    displays this help and exits"
 		echo "    -N    passes nvidia devices"
@@ -236,7 +246,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	VERBOSE=0
 
 	# parse the flags (default)
-	while getopts 'dwxansrihvND' option; do
+	while getopts 'dwxansriRhvND' option; do
 		case "$option" in
 			d) enable_display ;;
 			w) enable_wayland ;;
@@ -246,6 +256,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 			s) enable_dbus ;;
 			r) pass_dri ;;
 			i) pass_input_devices ;;
+			R) pass_hidraw_devices ;;
 			h) print_help ;;
 			v) VERBOSE=1 ;;
 			N) pass_nvidia ;;
