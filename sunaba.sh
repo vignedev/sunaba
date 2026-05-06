@@ -179,6 +179,7 @@ function common_env(){
 # pass input devices
 # usage: pass_input_devices
 function pass_input_devices(){
+  ro-pass "/sys/class/input"
 	dev-pass "/dev/input"
 }
 
