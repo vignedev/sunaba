@@ -140,8 +140,8 @@ function common_env(){
 		'/etc/ld.so.cache' '/etc/ld.so.conf' '/etc/ld.so.conf.d'
 
 	# set uid/gid to the current user's id
-	arg uid "$(id -u)"
-	arg gid "$(id -g)"
+	arg uid "$UID"
+	arg gid "$UID"
 
 	# basic devices
 	ro-pass '/sys/dev/char'
@@ -186,8 +186,12 @@ function pass_input_devices(){
 # usage: execute <command> [...arguments]
 function execute() {
 	bwrap "${argv[@]}" -- "$@" \
-	  200< <(getent passwd "$(id -u)" 65534) \
-		201< <(getent group "$(id -u)" 65534)
+	  200< <(printf '%s\n' \
+          "$USER:x:$UID:$UID::/home/$USER:/usr/bin/zsh" \
+          "nobody:x:65534:65534:Nobody:/:/usr/bin/nologin") \
+		201< <(printf '%s\n' \
+		      "$USER:x:$UID:" \
+		      "nobody:x:65534:")
 }
 
 #
