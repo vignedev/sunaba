@@ -291,11 +291,6 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	if [ "$has_bwrap_args" -eq 1 ]; then
 		for bwrap_arg in "${group_argv[@]}"; do
 			if [ "$pass_next" -ne 0 ]; then
-				if [ ! -e "$bwrap_arg" ]; then
-					echo "failed: could not resolve '$bwrap_arg'"
-					exit 1
-				fi
-
 				for _ in $(seq "$pass_next"); do
 					argv+=("$bwrap_arg")
 				done
