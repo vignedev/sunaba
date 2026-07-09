@@ -29,12 +29,37 @@ function enable_net() {
 # enables pipewire/pulse related files for audio
 # usage: enable_audio
 function enable_audio() {
-	if [ -S "$XDG_RUNTIME_DIR/pipewire-0" ]; then
-        ro-pass "$XDG_RUNTIME_DIR/pipewire-0"
+  # for pipewire (find the socket, pass it to its default location)
+  if command -v pw-cli >/dev/null; then
+    PW_SOCKET_NAME="$(pw-cli info 0 | grep -F 'core.name') | grep -oP '(?<=\")(.*?)(?=\")'"
+    if [ ! -z "$PW_SOCKET_NAME" ]; then
+      PIPEWIRE_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR:-${XDG_RUNTIME_DIR:-/run/user/$UID/}}"
+
+   	  if [ -S "${PIPEWIRE_RUNTIME_DIR}/${PW_SOCKET_NAME}" ]; then
+        arg ro-bind "${PIPEWIRE_RUNTIME_DIR}/${PW_SOCKET_NAME}" "/run/user/$UID/pipewire-0"
+      fi
     fi
-    if [ -d "$XDG_RUNTIME_DIR/pulse" ]; then
-        ro-pass "$XDG_RUNTIME_DIR/pulse"
+  fi
+
+  # for pulseaudio, locale its native (strip unix: ...) and pass it with its pid
+  if command -v pactl >/dev/null; then
+    PULSE_SOCKET_PATH=$(pactl info | grep -F 'Server String:' | cut -d: -f2- | xargs)
+    if [ ! -z "$PULSE_SOCKET_PATH" ]; then
+      # strip unix:...
+      if grep -qE -e '^unix:' <<< "$PULSE_SOCKET_PATH"; then
+        PULSE_SOCKET_PATH=$(sed 's|^unix:||g' <<< "$PULSE_SOCKET_PATH")
+      fi
+      if [ ! -z "$PULSE_SOCKET_PATH" ] && [ -S "$PULSE_SOCKET_PATH" ]; then
+        arg ro-bind "$PULSE_SOCKET_PATH" "/run/user/$UID/pulse/native"
+      fi
+
+      # if .../pid exists, pass that too just to be sure
+      PULSE_PID_PATH="$(dirname "${PULSE_SOCKET_PATH}")/pid"
+      if [ -f "$PULSE_PID_PATH" ]; then
+        arg ro-bind "$PULSE_PID_PATH" "/run/user/$UID/pulse/pid"
+      fi
     fi
+  fi
 }
 
 # usage: enable_wayland
@@ -157,7 +182,7 @@ function common_env(){
 	arg setenv 'HOME' "/home/$USER"
 	arg setenv 'XDG_CACHE_HOME' "/home/$USER/.cache"
 	arg setenv 'XDG_CONFIG_HOME' "/home/$USER/.config"
-	arg setenv 'XDG_RUNTIME_DIR' "$XDG_RUNTIME_DIR"
+	arg setenv 'XDG_RUNTIME_DIR' "/run/user/$UID"
 	arg setenv 'PATH' '/usr/local/sbin:/usr/local/bin:/usr/bin'
 
 	arg setenv LANG 'en_US.UTF-8'
