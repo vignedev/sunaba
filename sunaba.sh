@@ -83,8 +83,10 @@ function enable_x11 () {
 
 		arg setenv 'DISPLAY' :"$DISPLAY_ID"
 
-		ro-pass "$XAUTHORITY"
-		arg setenv 'XAUTHORITY' "$XAUTHORITY"
+    if [ ! -z "$XAUTHORITY" ]; then
+      ro-pass "$XAUTHORITY"
+      arg setenv 'XAUTHORITY' "$XAUTHORITY"
+    fi
 	else
 		echo "warning: DISPLAY is not set, X11 is not passed"
 	fi
