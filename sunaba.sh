@@ -160,6 +160,7 @@ function common_env(){
 	ro-pass '/etc/fonts' '/etc/localtime'
 	arg file 200 /etc/passwd
 	arg file 201 /etc/group
+	arg file 202 /etc/hosts
 
 	# these file may or may not exist, so only try but don't fail
 	try-ro-pass \
@@ -228,7 +229,9 @@ function execute() {
           "nobody:x:65534:65534:Nobody:/:/usr/bin/nologin") \
 		201< <(printf '%s\n' \
 		      "$USER:x:$UID:" \
-		      "nobody:x:65534:")
+		      "nobody:x:65534:") \
+		202< <(printf '%s\t%s\n' \
+		       '127.0.0.1' 'localhost')
 }
 
 #
