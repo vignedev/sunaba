@@ -143,7 +143,7 @@ class Sunaba(bwrap.Bwrap):
     self.append_arg("gid", str(guest_uid))
 
     self.bind("/sys/dev/char", readonly=True)
-    self.bind(str(homedir), guest_home)
+    self.bind(host_home, guest_home)
 
     # set common envvars
     self.set_env("USER", guest_user)
