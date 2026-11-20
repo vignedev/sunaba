@@ -157,7 +157,8 @@ function common_env(){
 	ro-pass '/usr'
 
 	# passing through /etc files
-	ro-pass '/etc/fonts' '/etc/localtime'
+	try-ro-pass '/etc/fonts'
+	try-ro-pass '/etc/localtime'
 	arg file 200 /etc/passwd
 	arg file 201 /etc/group
 	arg file 202 /etc/hosts
