@@ -19,10 +19,6 @@ class Sunaba(bwrap.Bwrap):
     uid: int | None = None,
   ) -> None:
     super().__init__()
-    host_home = (
-      Path(homedir) if homedir else (utils.xdg_data_home() / "sunaba")
-    ).absolute()
-    host_home.mkdir(exist_ok=True)
 
     # getting guest_info
     guest_user = os.environ.get("USER") if user is None else user
@@ -30,6 +26,14 @@ class Sunaba(bwrap.Bwrap):
     guest_home = Path(f"/home/{guest_user}").resolve()
     guest_uid = uid if uid is not None else os.getuid()
     guest_shell = os.environ.get("SHELL", "/bin/sh")
+
+    # set up the homedir
+    if homedir:
+      host_home = Path(homedir).absolute()
+      host_home.mkdir(exist_ok=True)
+      self.bind(host_home, guest_home)
+    else:
+      self.tmpfs(guest_home)
 
     # common setup and fs layout
     self.append_arg("unshare-all")
@@ -50,7 +54,6 @@ class Sunaba(bwrap.Bwrap):
     self.append_arg("gid", str(guest_uid))
 
     self.bind("/sys/dev/char", readonly=True)
-    self.bind(host_home, guest_home)
 
     # set common envvars
     self.set_env("USER", guest_user)
