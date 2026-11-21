@@ -87,6 +87,7 @@ class Sunaba(bwrap.Bwrap):
       self.bind(dir, ignore_errors=True, readonly=True)
 
     # virtual /etc files
+    self.bind("/etc/fonts", readonly=True, ignore_errors=True)
     self.bind("/etc/localtime", readonly=True, ignore_errors=True)
 
     # /etc/{passwd,group,hosts} need to be passed
@@ -216,7 +217,3 @@ class Sunaba(bwrap.Bwrap):
     ):
       self.dev_bind(entry)
     return self
-
-  # extra helper
-  def pass_fonts(self) -> Self:
-    return self.bind("/etc/fonts", readonly=True)
