@@ -154,6 +154,7 @@ class Sunaba(bwrap.Bwrap):
       wayland_socket = utils.xdg_runtime_dir() / wayland_display
       if wayland_socket.is_socket():
         self.bind(wayland_socket, readonly=True)
+        self.set_env("WAYLAND_DISPLAY", wayland_display)
       else:
         logger.warning("WAYLAND_DISPLAY is set, however its socket is not found")
         return self
