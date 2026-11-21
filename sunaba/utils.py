@@ -1,11 +1,11 @@
+import functools
 import json
 import logging
 import os
+import pathlib
 import re
 import shutil
 import subprocess
-from functools import cache
-from pathlib import Path
 
 logger = logging.getLogger("utils")
 
@@ -13,7 +13,7 @@ type StrPath = str | os.PathLike[str]
 
 
 def abspath(path: StrPath) -> str:
-  return str(Path(path).absolute())
+  return str(pathlib.Path(path).absolute())
 
 
 def exec(*argv: str) -> str:
@@ -58,17 +58,17 @@ def get_x11_socket() -> str | None:
   if not (match := re.search(r":(\d+)(?:\.\d+)?$", display)):
     return None
 
-  socket_path = Path("/tmp/.X11-unix") / f"X{match.group(1)}"
+  socket_path = pathlib.Path("/tmp/.X11-unix") / f"X{match.group(1)}"
   return str(socket_path) if socket_path.is_socket() else None
 
 
-@cache
-def xdg_runtime_dir() -> Path:
-  return Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
+@functools.cache
+def xdg_runtime_dir() -> pathlib.Path:
+  return pathlib.Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
 
 
-@cache
-def xdg_data_home() -> Path:
+@functools.cache
+def xdg_data_home() -> pathlib.Path:
   if val := os.environ.get("XDG_DATA_HOME"):
-    return Path(val)
-  return Path.home() / ".local" / "share"
+    return pathlib.Path(val)
+  return pathlib.Path.home() / ".local" / "share"

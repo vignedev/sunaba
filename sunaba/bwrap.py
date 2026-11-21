@@ -1,7 +1,7 @@
 import os
-from typing import Self
+import typing
 
-from utils import StrPath, abspath
+from .utils import StrPath, abspath
 
 BWRAP_EXECUTABLE = "bwrap"
 
@@ -14,14 +14,19 @@ class Bwrap:
     self.argv = []
     self.files = {}
 
-  def append_arg(self, key: str, *values: str) -> Self:
+  def append_arg(self, key: str, *values: str) -> typing.Self:
     self.argv.extend([f"--{key}", *values])
     return self
 
   # regular binders
   def __binder(
-    self, name: str, src: StrPath, dest: StrPath, readonly: bool, ignore_errors: bool
-  ) -> Self:
+    self,
+    name: str,
+    src: StrPath,
+    dest: StrPath,
+    readonly: bool,
+    ignore_errors: bool,
+  ) -> typing.Self:
     arg = f"{'ro-' if readonly else ''}{name}{'-try' if ignore_errors else ''}"
     self.append_arg(arg, abspath(src), abspath(dest))
     return self
@@ -32,38 +37,41 @@ class Bwrap:
     dest: StrPath | None = None,
     readonly: bool = False,
     ignore_errors: bool = False,
-  ) -> Self:
+  ) -> typing.Self:
     return self.__binder(
       "bind", src=src, dest=dest or src, readonly=readonly, ignore_errors=ignore_errors
     )
 
   def dev_bind(
-    self, src: StrPath, dest: StrPath | None = None, ignore_errors: bool = False
-  ) -> Self:
+    self,
+    src: StrPath,
+    dest: StrPath | None = None,
+    ignore_errors: bool = False,
+  ) -> typing.Self:
     return self.__binder(
       "dev-bind", src=src, dest=dest or src, readonly=False, ignore_errors=ignore_errors
     )
 
   # environments
-  def unset_env(self, key: str) -> Self:
+  def unset_env(self, key: str) -> typing.Self:
     self.append_arg("unsetenv", key)
     return self
 
-  def set_env(self, key: str, var: str) -> Self:
+  def set_env(self, key: str, var: str) -> typing.Self:
     self.append_arg("setenv", key, var)
     return self
 
   # other common functions
-  def tmpfs(self, target: StrPath) -> Self:
+  def tmpfs(self, target: StrPath) -> typing.Self:
     self.append_arg("tmpfs", abspath(target))
     return self
 
-  def symlink(self, src: StrPath, dest: StrPath) -> Self:
+  def symlink(self, src: StrPath, dest: StrPath) -> typing.Self:
     self.append_arg("symlink", abspath(src), abspath(dest))
     return self
 
   # arbitrary data from str
-  def file(self, path: StrPath, data: bytes) -> Self:
+  def file(self, path: StrPath, data: bytes) -> typing.Self:
     memfd = os.memfd_create(abspath(path), flags=0)
     os.write(memfd, data)
     os.lseek(memfd, 0, os.SEEK_SET)
