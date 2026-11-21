@@ -9,6 +9,12 @@ from pathlib import Path
 
 logger = logging.getLogger("utils")
 
+type StrPath = str | os.PathLike[str]
+
+
+def abspath(path: StrPath) -> str:
+  return str(Path(path).absolute())
+
 
 def exec(*argv: str) -> str:
   return subprocess.run(argv, capture_output=True, text=True, check=True).stdout.strip()
