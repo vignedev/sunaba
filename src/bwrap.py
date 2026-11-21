@@ -1,7 +1,7 @@
 import os
 from typing import Self
 
-from .utils import StrPath, abspath
+from utils import StrPath, abspath
 
 BWRAP_EXECUTABLE = "bwrap"
 

@@ -5,16 +5,16 @@ from itertools import chain
 from pathlib import Path
 from typing import Self
 
-from . import bwrap, utils
-from .utils import StrPath
+import utils
+from bwrap import Bwrap
 
 logger = logging.getLogger("sunaba")
 
 
-class Sunaba(bwrap.Bwrap):
+class Sunaba(Bwrap):
   def __init__(
     self,
-    homedir: StrPath | None = None,
+    homedir: utils.StrPath | None = None,
     user: str | None = None,
     uid: int | None = None,
   ) -> None:
