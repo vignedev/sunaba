@@ -3,6 +3,8 @@ from typing import Self
 
 from .utils import StrPath, abspath
 
+BWRAP_EXECUTABLE = "bwrap"
+
 
 class Bwrap:
   argv: list[str]
@@ -72,7 +74,22 @@ class Bwrap:
 
     return self
 
+  def __str__(self):
+    import shlex
+
+    lines = [BWRAP_EXECUTABLE]
+    collector = []
+    for arg in self.argv:
+      if not arg.startswith("--"):
+        collector.append(arg)
+      else:
+        if collector:
+          lines.append("  " + shlex.join(collector))
+        collector = [arg]
+
+    return "\n".join(lines)
+
   # final runner
   def run(self, arg0: str, argv: list[str] | None = None):
-    final = ["bwrap", *self.argv, "--", arg0, *(argv or [])]
-    os.execvp("bwrap", final)
+    final = [BWRAP_EXECUTABLE, *self.argv, "--", arg0, *(argv or [])]
+    os.execvp(BWRAP_EXECUTABLE, final)
