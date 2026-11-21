@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
+import itertools
 import logging
 import os
-from itertools import chain
-from pathlib import Path
-from typing import Self
+from pathlib import Path as _Path
+from typing import Self as _Self
 
+import bwrap
 import utils
-from bwrap import Bwrap
 
 logger = logging.getLogger("sunaba")
 
 
-class Sunaba(Bwrap):
+class Sunaba(bwrap.Bwrap):
   def __init__(
     self,
     homedir: utils.StrPath | None = None,
@@ -23,13 +23,13 @@ class Sunaba(Bwrap):
     # getting guest_info
     guest_user = os.environ.get("USER") if user is None else user
     assert guest_user, "could not determine USER"
-    guest_home = Path(f"/home/{guest_user}").resolve()
+    guest_home = _Path(f"/home/{guest_user}").resolve()
     guest_uid = uid if uid is not None else os.getuid()
     guest_shell = os.environ.get("SHELL", "/bin/sh")
 
     # set up the homedir
     if homedir:
-      host_home = Path(homedir).absolute()
+      host_home = _Path(homedir).absolute()
       host_home.mkdir(exist_ok=True)
       self.bind(host_home, guest_home)
     else:
@@ -112,22 +112,22 @@ class Sunaba(Bwrap):
     self.file("/etc/hosts", b"127.0.0.1\tlocalhost\n")
 
   # audio
-  def __enable_pipewire(self) -> Self:
+  def __enable_pipewire(self) -> _Self:
     if pipewire_socket_name := utils.get_pipewire_socket_name():
       pipewire_socket = (
-        Path(os.environ.get("PIPEWIRE_RUNTIME_DIR", utils.xdg_runtime_dir()))
+        _Path(os.environ.get("PIPEWIRE_RUNTIME_DIR", utils.xdg_runtime_dir()))
         / pipewire_socket_name
       )
 
       if pipewire_socket.is_socket():
         self.bind(
-          pipewire_socket, Path(f"/run/user/{os.getuid()}") / pipewire_socket_name
+          pipewire_socket, _Path(f"/run/user/{os.getuid()}") / pipewire_socket_name
         )
     return self
 
-  def __enable_pulseaudio(self) -> Self:
+  def __enable_pulseaudio(self) -> _Self:
     if pulseaudio_socket := utils.get_pulseaudio_socket_path():
-      pa_socket = Path(pulseaudio_socket.removeprefix("unix:"))
+      pa_socket = _Path(pulseaudio_socket.removeprefix("unix:"))
       if pa_socket.is_socket():
         self.bind(pa_socket, utils.xdg_runtime_dir() / "pulse" / "native")
       else:
@@ -136,7 +136,7 @@ class Sunaba(Bwrap):
         )
     return self
 
-  def with_audio(self, pipewire: bool = True, pulseaudio: bool = True) -> Self:
+  def with_audio(self, pipewire: bool = True, pulseaudio: bool = True) -> _Self:
     if pipewire:
       self.__enable_pipewire()
     if pulseaudio:
@@ -144,7 +144,7 @@ class Sunaba(Bwrap):
     return self
 
   # networking
-  def enable_net(self, custom_resolvconf: bytes | None = None) -> Self:
+  def enable_net(self, custom_resolvconf: bytes | None = None) -> _Self:
     if custom_resolvconf:
       self.file("/etc/resolv.conf", custom_resolvconf)
     else:
@@ -153,7 +153,7 @@ class Sunaba(Bwrap):
     return self
 
   # display
-  def __enable_wayland(self) -> Self:
+  def __enable_wayland(self) -> _Self:
     if wayland_display := os.environ.get("WAYLAND_DISPLAY"):
       wayland_socket = utils.xdg_runtime_dir() / wayland_display
       if wayland_socket.is_socket():
@@ -168,7 +168,7 @@ class Sunaba(Bwrap):
         self.bind(wayland_socket_lock, readonly=True)
     return self
 
-  def __enable_x11(self) -> Self:
+  def __enable_x11(self) -> _Self:
     if x11_display := os.environ.get("DISPLAY"):
       if not (x11_socket := utils.get_x11_socket()):
         logger.warning("DISPLAY is set, but socket is not found")
@@ -182,7 +182,7 @@ class Sunaba(Bwrap):
         self.set_env("XAUTHORITY", xauthority)
     return self
 
-  def with_display(self, wayland: bool = True, x11: bool = True) -> Self:
+  def with_display(self, wayland: bool = True, x11: bool = True) -> _Self:
     if wayland:
       self.__enable_wayland()
     if x11:
@@ -190,30 +190,33 @@ class Sunaba(Bwrap):
     return self
 
   # raw-device blocks
-  def pass_dri(self) -> Self:
+  def pass_dri(self) -> _Self:
     self.bind("/sys/devices", readonly=True)
     self.dev_bind("/dev/dri")
     return self
 
-  def pass_drm(self) -> Self:
+  def pass_drm(self) -> _Self:
     self.bind("/sys/class/drm", readonly=True)
     return self
 
-  def pass_input(self) -> Self:
+  def pass_input(self) -> _Self:
     self.bind("/sys/class/input", readonly=True)
     self.dev_bind("/dev/input")
     return self
 
-  def pass_hidraw(self) -> Self:
+  def pass_hidraw(self) -> _Self:
     self.bind("/sys/class/hidraw", readonly=True)
-    for device in Path("/dev").glob("hidraw*"):
+    for device in _Path("/dev").glob("hidraw*"):
       self.dev_bind(device)
     return self
 
   # nvidia-specific
-  def with_nvidia(self) -> Self:
-    for entry in chain(
-      Path("/dev").glob("nvidia*"), Path("/sys/module").glob("nvidia*")
+  def with_nvidia(self) -> _Self:
+    for entry in itertools.chain(
+      _Path("/dev").glob("nvidia*"), _Path("/sys/module").glob("nvidia*")
     ):
       self.dev_bind(entry)
     return self
+
+
+__all__ = ["Sunaba"]

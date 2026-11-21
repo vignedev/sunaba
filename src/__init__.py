@@ -1,3 +1,3 @@
-from .sunaba import Sunaba
+from sunaba import Bwrap, Sunaba
 
-__all__ = ["Sunaba"]
+__all__ = ["Bwrap", "Sunaba"]
