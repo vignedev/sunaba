@@ -38,7 +38,15 @@ def main() -> None:
     )
     parser.add_argument("-D", "--drm", action="store_true", help="Pass DRM devices")
     parser.add_argument(
-      "--dry-run", action="store_true", help="Output the full Bubblewrap arguments"
+      "-v",
+      "--verbose",
+      action="store_true",
+      help="Output the full Bubblewrap arguments",
+    )
+    parser.add_argument(
+      "--dry-run",
+      action="store_true",
+      help="Do not run, only output the Bubblewrap arguments",
     )
     parser.add_argument(
       "command",
@@ -132,9 +140,10 @@ def main() -> None:
   sandbox._argv.extend(bwrap_argv)
 
   # just in case im still sane
-  if args.dry_run:
+  if args.verbose or args.dry_run:
     parser._print_message(str(sandbox) + "\n")
-    parser.exit(0)
+    if args.dry_run:
+      parser.exit(0)
 
   # ensure that -- <command> actually exists & run
   if not sandboxed_cmd:
