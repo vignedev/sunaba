@@ -109,6 +109,8 @@ class Bwrap:
         if collector:
           lines.append("  " + shlex.join(collector))
         collector = [arg]
+    if collector:  # backflush
+      lines.append("  " + shlex.join(collector))
 
     return "\n".join(lines)
 
