@@ -14,8 +14,22 @@ def main() -> None:
     parser.add_argument(
       "-d",
       "--display",
-      choices=("both", "x11", "wayland"),
+      action="store_true",
       help="Enable (both Wayland and X11)",
+      required=False,
+    )
+    parser.add_argument(
+      "-w",
+      "--wayland",
+      action="store_true",
+      help="Enable Wayland",
+      required=False,
+    )
+    parser.add_argument(
+      "-x",
+      "--x11",
+      action="store_true",
+      help="Enable X11",
       required=False,
     )
     parser.add_argument(
@@ -61,9 +75,9 @@ def main() -> None:
   if not args.command:
     parser.error("missing command after '--'")
 
-  if args.display:
+  if args.display or args.wayland or args.x11:
     sandbox.with_display(
-      wayland=args.display in ("both", "wayland"), x11=args.display in ("both", "x11")
+      wayland=(args.display or args.wayland), x11=(args.display or args.x11)
     )
   if args.audio:
     sandbox.with_audio()
