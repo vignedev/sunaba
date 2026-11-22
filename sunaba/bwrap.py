@@ -7,16 +7,22 @@ BWRAP_EXECUTABLE = "bwrap"
 
 
 class Bwrap:
-  argv: list[str]
+  _argv: list[str]
   files: dict[int, bytes]
+  environ: dict[str, str]
 
   def __init__(self) -> None:
-    self.argv = []
+    self._argv = []
     self.files = {}
+    self.environ = {}
 
   def append_arg(self, key: str, *values: str) -> typing.Self:
-    self.argv.extend([f"--{key}", *values])
+    self._argv.extend([f"--{key}", *values])
     return self
+
+  @property
+  def arguments(self) -> list[str]:
+    return [*self._argv, *self._environ_argv()]
 
   # regular binders
   def __binder(
@@ -54,12 +60,21 @@ class Bwrap:
 
   # environments
   def unset_env(self, key: str) -> typing.Self:
-    self.append_arg("unsetenv", key)
+    self.environ.pop(key, None)
     return self
 
   def set_env(self, key: str, var: str) -> typing.Self:
-    self.append_arg("setenv", key, var)
+    self.environ[key] = var
     return self
+
+  def get_env(self, key: str) -> str | None:
+    return self.environ.get(key, None)
+
+  def _environ_argv(self) -> list[str]:
+    collector = []
+    for key, value in self.environ.items():
+      collector.extend(["--setenv", key, value])
+    return collector
 
   # other common functions
   def tmpfs(self, target: StrPath) -> typing.Self:
@@ -87,7 +102,7 @@ class Bwrap:
 
     lines = [BWRAP_EXECUTABLE]
     collector = []
-    for arg in self.argv:
+    for arg in self.arguments:
       if not arg.startswith("--"):
         collector.append(arg)
       else:
@@ -99,5 +114,5 @@ class Bwrap:
 
   # final runner
   def run(self, arg0: str, argv: list[str] | None = None):
-    final = [BWRAP_EXECUTABLE, *self.argv, "--", arg0, *(argv or [])]
+    final = [BWRAP_EXECUTABLE, *self.arguments, "--", arg0, *(argv or [])]
     os.execvp(BWRAP_EXECUTABLE, final)
