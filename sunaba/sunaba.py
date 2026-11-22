@@ -18,6 +18,12 @@ logger = logging.getLogger("sunaba")
 
 
 class Sunaba(Bwrap):
+  guest_user: str
+
+  @property
+  def guest_home(self) -> pathlib.Path:
+    return pathlib.Path(f"/home/{self.guest_user}").absolute()
+
   def __init__(
     self,
     homedir: StrPath | None = None,
@@ -29,7 +35,7 @@ class Sunaba(Bwrap):
     # getting guest_info
     guest_user = os.environ.get("USER") if user is None else user
     assert guest_user, "could not determine USER"
-    guest_home = pathlib.Path(f"/home/{guest_user}").resolve()
+    self.guest_user = guest_user
     guest_uid = uid if uid is not None else os.getuid()
     guest_shell = os.environ.get("SHELL", "/bin/sh")
 
@@ -37,9 +43,9 @@ class Sunaba(Bwrap):
     if homedir:
       host_home = pathlib.Path(homedir).absolute()
       host_home.mkdir(exist_ok=True)
-      self.bind(host_home, guest_home)
+      self.bind(host_home, self.guest_home)
     else:
-      self.tmpfs(guest_home)
+      self.tmpfs(self.guest_home)
 
     # common setup and fs layout
     self.append_arg("unshare-all")
@@ -62,10 +68,10 @@ class Sunaba(Bwrap):
     self.bind("/sys/dev/char", readonly=True)
 
     # set common envvars
-    self.set_env("USER", guest_user)
-    self.set_env("HOME", str(guest_home))
-    self.set_env("XDG_CACHE_HOME", str(guest_home / ".cache"))
-    self.set_env("XDG_CONFIG_HOME", str(guest_home / ".config"))
+    self.set_env("USER", self.guest_user)
+    self.set_env("HOME", str(self.guest_home))
+    self.set_env("XDG_CACHE_HOME", str(self.guest_home / ".cache"))
+    self.set_env("XDG_CONFIG_HOME", str(self.guest_home / ".config"))
     self.set_env("XDG_RUNTIME_DIR", f"/run/user/{guest_uid}")
     self.set_env("PATH", "/usr/local/sbin:/usr/local/bin:/usr/bin")
 
@@ -101,7 +107,7 @@ class Sunaba(Bwrap):
       "/etc/passwd",
       "\n".join(
         [
-          f"{guest_user}:x:{guest_uid}:{guest_uid}::{guest_home}:{guest_shell}",
+          f"{self.guest_user}:x:{guest_uid}:{guest_uid}::{self.guest_home!r}:{guest_shell}",
           "nobody:x:65534:65534:Nobody:/:/usr/bin/nologin",
         ]
       ).encode(),
@@ -110,7 +116,7 @@ class Sunaba(Bwrap):
       "/etc/group",
       "\n".join(
         [
-          f"{guest_user}:x:{guest_uid}:",
+          f"{self.guest_user}:x:{guest_uid}:",
           "nobody:x:65534:",
         ]
       ).encode(),
