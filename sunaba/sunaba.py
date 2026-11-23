@@ -94,7 +94,7 @@ class Sunaba(Bwrap):
       # certificates
       "/usr/share/ca-certificates",
       "/etc/ssl",
-      "/etc/certificates",
+      "/etc/ca-certificates",
     ]:
       self.bind(dir, ignore_errors=True, readonly=True)
 
