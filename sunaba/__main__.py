@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 def main() -> None:
   import argparse
 
@@ -123,32 +126,25 @@ def main() -> None:
     bwrap_cmd_groups.append(collector)
 
   # parse individual groups and handle special cases
+  SunabaBwrapExpansions: dict[str, Callable[[Sunaba, str], Sunaba]] = {
+    "--pass": lambda sandbox, target: sandbox.bind(target),
+    "--ro-pass": lambda sandbox, target: sandbox.bind(target, readonly=True),
+    "--pass-try": lambda sandbox, target: sandbox.bind(target, ignore_errors=True),
+    "--ro-pass-try": lambda sandbox, target: sandbox.bind(
+      target, readonly=True, ignore_errors=True
+    ),
+    "--dev-pass": lambda sandbox, target: sandbox.dev_bind(target),
+    "--dev-pass-try": lambda sandbox, target: sandbox.dev_bind(
+      target, ignore_errors=True
+    ),
+  }
   bwrap_argv = []
   for group in bwrap_cmd_groups:
     command = group[0]
-    if command in (
-      "--pass",
-      "--ro-pass",
-      "--pass-try",
-      "--ro-pass-try",
-      "--dev-pass",
-      "--dev-pass-try",
-    ):
+    if expansion := SunabaBwrapExpansions[command]:
       if len(group) > 2:
         parser.error(f"invalid argument count for {command}")
-      target = group[1]
-      if command == "--pass":
-        sandbox.bind(target)
-      elif command == "--ro-pass":
-        sandbox.bind(target, readonly=True)
-      elif command == "--pass-try":
-        sandbox.bind(target, ignore_errors=True)
-      elif command == "--ro-pass-try":
-        sandbox.bind(target, readonly=True, ignore_errors=True)
-      elif command == "--dev-pass":
-        sandbox.dev_bind(target)
-      elif command == "--dev-pass-try":
-        sandbox.dev_bind(target, ignore_errors=True)
+      expansion(sandbox, group[1])
     else:
       bwrap_argv.extend(group)
   sandbox._argv.extend(bwrap_argv)
