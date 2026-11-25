@@ -1,13 +1,28 @@
-from typing import Callable
-
-
 def main() -> None:
   import argparse
+  from collections.abc import Callable
 
   from sunaba import Sunaba
 
+  # list of expansions/bwrap injections
+  SunabaBwrapExpansions: dict[str, Callable[[Sunaba, str], Sunaba]] = {
+    "--pass": lambda sandbox, target: sandbox.bind(target),
+    "--ro-pass": lambda sandbox, target: sandbox.bind(target, readonly=True),
+    "--pass-try": lambda sandbox, target: sandbox.bind(target, ignore_errors=True),
+    "--ro-pass-try": lambda sandbox, target: sandbox.bind(
+      target, readonly=True, ignore_errors=True
+    ),
+    "--dev-pass": lambda sandbox, target: sandbox.dev_bind(target),
+    "--dev-pass-try": lambda sandbox, target: sandbox.dev_bind(
+      target, ignore_errors=True
+    ),
+  }
+
   def get_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="simple, dirty and biased sandbox")
+    parser = argparse.ArgumentParser(
+      description="simple, dirty and biased sandbox",
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
       "-H",
       "--homedir",
@@ -70,6 +85,15 @@ def main() -> None:
       nargs=argparse.REMAINDER,
       help="Command and arguments to run inside the sandbox",
     )
+
+    parser.epilog = f"""
+Arguments can be passed directly into the underlaying bwrap in by using --, such as:
+  sunaba --display --audio -- --setenv GTK_DEBUG=interactive -- gtk3-demo
+         \\__sunaba args__/  \\______ bwrap args ____________/    \\__ actual commands
+Additionally, there are certain "helper" arguments that are expanded if used in the bwrap arguments sections, which are:
+  {"\n  ".join(SunabaBwrapExpansions.keys())}
+"""
+
     return parser
 
   parser = get_parser()
@@ -126,18 +150,6 @@ def main() -> None:
     bwrap_cmd_groups.append(collector)
 
   # parse individual groups and handle special cases
-  SunabaBwrapExpansions: dict[str, Callable[[Sunaba, str], Sunaba]] = {
-    "--pass": lambda sandbox, target: sandbox.bind(target),
-    "--ro-pass": lambda sandbox, target: sandbox.bind(target, readonly=True),
-    "--pass-try": lambda sandbox, target: sandbox.bind(target, ignore_errors=True),
-    "--ro-pass-try": lambda sandbox, target: sandbox.bind(
-      target, readonly=True, ignore_errors=True
-    ),
-    "--dev-pass": lambda sandbox, target: sandbox.dev_bind(target),
-    "--dev-pass-try": lambda sandbox, target: sandbox.dev_bind(
-      target, ignore_errors=True
-    ),
-  }
   bwrap_argv = []
   for group in bwrap_cmd_groups:
     command = group[0]
