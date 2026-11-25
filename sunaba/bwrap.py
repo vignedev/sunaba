@@ -10,11 +10,13 @@ class Bwrap:
   _argv: list[str]
   files: dict[int, bytes]
   environ: dict[str, str]
+  _chdir: StrPath | None
 
   def __init__(self) -> None:
     self._argv = []
     self.files = {}
     self.environ = {}
+    self._chdir = None
 
   def append_arg(self, key: str, *values: str) -> typing.Self:
     self._argv.extend([f"--{key}", *values])
@@ -22,7 +24,10 @@ class Bwrap:
 
   @property
   def arguments(self) -> list[str]:
-    return [*self._argv, *self._environ_argv()]
+    argv = [*self._argv, *self._environ_argv()]
+    if self._chdir:
+      argv.extend(["--chdir", str(self._chdir)])
+    return argv
 
   # regular binders
   def __binder(
@@ -83,6 +88,10 @@ class Bwrap:
 
   def symlink(self, src: StrPath, dest: StrPath) -> typing.Self:
     self.append_arg("symlink", abspath(src), abspath(dest))
+    return self
+
+  def chdir(self, src: StrPath) -> typing.Self:
+    self._chdir = src
     return self
 
   # arbitrary data from str
