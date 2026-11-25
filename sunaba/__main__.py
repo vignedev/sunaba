@@ -5,16 +5,24 @@ def main() -> None:
   from sunaba import Sunaba
 
   # list of expansions/bwrap injections
-  SunabaBwrapExpansions: dict[str, Callable[[Sunaba, str], Sunaba]] = {
-    "--pass": lambda sandbox, target: sandbox.bind(target),
-    "--ro-pass": lambda sandbox, target: sandbox.bind(target, readonly=True),
-    "--pass-try": lambda sandbox, target: sandbox.bind(target, ignore_errors=True),
-    "--ro-pass-try": lambda sandbox, target: sandbox.bind(
-      target, readonly=True, ignore_errors=True
+  # tuple[0] -> n_args, tuple[1] -> args
+  SunabaBwrapExpansions: dict[
+    str, tuple[int, Callable[[Sunaba, list[str]], Sunaba]]
+  ] = {
+    "--pass": (1, lambda sandbox, args: sandbox.bind(args[0])),
+    "--ro-pass": (1, lambda sandbox, args: sandbox.bind(args[0], readonly=True)),
+    "--pass-try": (
+      1,
+      lambda sandbox, args: sandbox.bind(args[0], ignore_errors=True),
     ),
-    "--dev-pass": lambda sandbox, target: sandbox.dev_bind(target),
-    "--dev-pass-try": lambda sandbox, target: sandbox.dev_bind(
-      target, ignore_errors=True
+    "--ro-pass-try": (
+      1,
+      lambda sandbox, args: sandbox.bind(args[0], readonly=True, ignore_errors=True),
+    ),
+    "--dev-pass": (1, lambda sandbox, args: sandbox.dev_bind(args[0])),
+    "--dev-pass-try": (
+      1,
+      lambda sandbox, args: sandbox.dev_bind(args[0], ignore_errors=True),
     ),
   }
 
@@ -154,9 +162,9 @@ Additionally, there are certain "helper" arguments that are expanded if used in 
   for group in bwrap_cmd_groups:
     command = group[0]
     if expansion := SunabaBwrapExpansions[command]:
-      if len(group) > 2:
-        parser.error(f"invalid argument count for {command}")
-      expansion(sandbox, group[1])
+      if (len(group) - 1) != expansion[0]:
+        parser.error(f"invalid argument count for {command} (required {expansion[0]})")
+      expansion[1](sandbox, group[1:])
     else:
       bwrap_argv.extend(group)
   sandbox._argv.extend(bwrap_argv)
