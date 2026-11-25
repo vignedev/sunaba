@@ -1,6 +1,7 @@
 def main() -> None:
   import argparse
   from collections.abc import Callable
+  from pathlib import Path
 
   from sunaba import Sunaba
 
@@ -23,6 +24,11 @@ def main() -> None:
     "--dev-pass-try": (
       1,
       lambda sandbox, args: sandbox.dev_bind(args[0], ignore_errors=True),
+    ),
+    "--pass-cwd": (0, lambda sandbox, args: sandbox.bind(Path.cwd()).chdir(Path.cwd())),
+    "--pass-ro-cwd": (
+      0,
+      lambda sandbox, args: sandbox.bind(Path.cwd(), readonly=True).chdir(Path.cwd()),
     ),
   }
 
