@@ -167,7 +167,9 @@ Additionally, there are certain "helper" arguments that are expanded if used in 
   bwrap_argv = []
   for group in bwrap_cmd_groups:
     command = group[0]
-    if expansion := SunabaBwrapExpansions[command]:
+    if command in SunabaBwrapExpansions and (
+      expansion := SunabaBwrapExpansions[command]
+    ):
       if (len(group) - 1) != expansion[0]:
         parser.error(f"invalid argument count for {command} (required {expansion[0]})")
       expansion[1](sandbox, group[1:])
